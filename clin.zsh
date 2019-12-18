@@ -28,15 +28,9 @@ if [[ $cur_state == 'OUT' ]]; then
     date +"%F %H:%M:%S" > ~/.clock_log/clin_time
     date +"IN %H:%M" > ~/.clock_log/state
 
-    #The state's updated, trigger a redraw of the terminal prompt
-    #
-    #
-    #
-    #
-    #
-    POWERLEVEL9K_MULTILINE_FIRST_PROMPT_PREFIX="\n"
-    POWERLEVEL9K_MULTILINE_LAST_PROMPT_PREFIX="%K{white}%F{black} `cat ~/.clock_log/state | awk '{$1=$1;print}'` %f%k%F{white}%f "
-    #source ~/.pl9k_zshrc.zsh
+    #The state's updated,
+    #my POWERLEVEL9K configuration has a custom segment that reads the state
+    #file, so this is all we need to do to update the prompt
 else
     echo "You've already clocked in, use clest if you forgot to clock out"
     echo "    IN@ " $cur_state

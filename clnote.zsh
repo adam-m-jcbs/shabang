@@ -1,7 +1,7 @@
 #!/bin/zsh
 
-## Clock Out script
-#   In collaboration with clin.zsh and clest.zsh, it maintains these files:
+## Clock Note script
+#   In collaboration with clin.zsh, clout.zsh, and clest.zsh, it maintains these files:
 #       ~/.clock_log/clin_time      --> ASCII one line
 #                                       if clocked in: the output of `date +"%F %H:%M:%S"` recording when you clocked in
 #                                       if clocked out: OUT
@@ -15,10 +15,17 @@
 #                                       that would need some hooks/triggers for
 #                                       every time prompt is redrawn.  Do it
 #                                       some day if you can.
+#       ~/.clock_log/clin_notes     --> A log of timestamped, one-line notes
+#                                       describing actions, notes, ideas that you want to log while clocked in
+#                                       It is an error to try to modify this
+#                                       while not clocked in.
+#                                       This file only ever contains a log for
+#                                       the current session.  This is then
+#                                       written out to a .log file and deleted.
 
 ###Algorithm outline
 
-#User has tried to clock out, so check state
+#User has tried to make a clock note. check state
 #   TODO: Add error checks 
 #       file should exist
 #       file should always have just one line with specifically formatted data
@@ -26,47 +33,17 @@
 cur_state=`cat ~/.clock_log/clin_time | head -n1 | awk '{$1=$1;print}'` #awk magic trims outer spaces and squeezes internal spaces to 1
 if [[ cur_state == 'OUT' ]]; then
     #We're here, so state was clocked out.
-    echo "You've already clocked out!"
+    echo "You're clocked out, cannot make a note!"
 else
     #We're here, so state should be clock-in time YYYY-MM-DD HH:MM:SS
 
-    #calculate time clocked in (requires dateutils linux package)
-    cl_start=$cur_state
-    cl_end=`date +"%F %H:%M:%S"`
-    time_elapsed_record=`datediff --format="%d %H:%M:%S" $cl_start $cl_end`
-    time_elapsed_human=`datediff --format="%H:%M" $cl_start $cl_end`
-
-    #get any user note
+    #get user's note
     #    TODO: error checking, make this a proper script
     if [[ $# -gt 0 ]]; then
         user_note=$1
     fi
 
-    #store record in ~/.clock_log/YYYY-MM-DD.log
-    echo ${cl_start} -- ${cl_end} >>  ~/.clock_log/`date +"%F"`.log
-    if [[ -f ~/.clock_log/clin_notes ]]; then
-        cat ~/.clock_log/clin_notes >>   ~/.clock_log/`date +"%F"`.log
-    fi
-    echo "    " $user_note >> ~/.clock_log/`date +"%F"`.log
-    echo "     Days H:M:S - " $time_elapsed_record >> ~/.clock_log/`date +"%F"`.log
-    
-    #tell user gist of what happened
-    echo "clocked out!"
-    if [[ -f ~/.clock_log/clin_notes ]]; then
-        echo "    log:"
-        cat ~/.clock_log/clin_notes
-    fi
-    echo "    note:           " $user_note
-    echo "    focus duration: " $time_elapsed_human
-    
-    #update state variables and reset state for clock in
-    echo "OUT" > ~/.clock_log/clin_time
-    echo "OUT" > ~/.clock_log/state
-    if [[ -f ~/.clock_log/clin_notes ]]; then
-        rm ~/.clock_log/clin_notes
-    fi
-
-    #The state's updated,
-    #my POWERLEVEL9K configuration has a custom segment that reads the state
-    #file, so this is all we need to do to update the prompt
+    #Append note to clocked in log, echo entry to user
+    echo "    " `date +"%H:%M:%S"` '-' $user_note >> ~/.clock_log/clin_notes
+    echo "    " `date +"%H:%M:%S"` '-' $user_note
 fi

@@ -33,18 +33,24 @@ else
     #calculate time clocked in (requires dateutils linux package)
     cl_start=$cur_state
     cl_end=`date +"%F %H:%M:%S"`
-    echo $cl_start to $cl_end
     time_elapsed_record=`datediff --format="%d %H:%M:%S" $cl_start $cl_end`
     time_elapsed_human=`datediff --format="%H:%M" $cl_start $cl_end`
-    echo $time_elapsed_record
-    echo $time_elapsed_human
+
+    #get any user note
+    #    TODO: error checking, make this a proper script
+    if [[ $# -gt 0 ]]; then
+        user_note=$1
+    fi
 
     #store record in ~/.clock_log/YYYY-MM-DD.log
-    echo ${cl_start} -- ${cl_end} >>  `date +"%F"`.log
-    echo "    " $time_elapsed_record >> `date +"%F"`.log
+    echo ${cl_start} -- ${cl_end} >>  ~/.clock_log/`date +"%F"`.log
+    echo "    " $user_note >> ~/.clock_log/`date +"%F"`.log
+    echo "     Days H:M:S - " $time_elapsed_record >> ~/.clock_log/`date +"%F"`.log
     
     #tell user gist of what happened
-    echo "clocked out! focus duration: " $time_elapsed_human
+    echo "clocked out!"
+    echo "    note:           " $user_note
+    echo "    focus duration: " $time_elapsed_human
     
     #update state variables
     echo "OUT" > ~/.clock_log/clin_time

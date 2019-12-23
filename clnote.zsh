@@ -36,7 +36,7 @@
 #       file should always have just one line with specifically formatted data
 #   TODO: make directories variables instead of hard-coded
 cur_state=`cat ~/.clock_log/clin_time | head -n1 | awk '{$1=$1;print}'` #awk magic trims outer spaces and squeezes internal spaces to 1
-if [[ cur_state == 'OUT' ]]; then
+if [[ $cur_state == 'OUT' ]]; then
     #We're here, so record note in clocked out log
     
     #get user's note

@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 ## Clock Out script
-#   In collaboration with clin.zsh and clest.zsh, it maintains these files:
+#   In collaboration with clin.zsh, clnote.zsh, and clp_state.zsh, it maintains/uses/parses these files:
 #       ~/.clock_log/clin_time      --> ASCII one line
 #                                       if clocked in: the output of `date +"%F %H:%M:%S"` recording when you clocked in
 #                                       if clocked out: OUT
@@ -10,13 +10,24 @@
 #       ~/.clock_log/state          --> short, human-readable current status
 #                                       "IN HH:MM" w/ HH:MM the time clocked in , or
 #                                       "OUT"
-#                                       TODO: it would be awesome to have IN
-#                                       show time elapses since clock in, but
-#                                       that would need some hooks/triggers for
-#                                       every time prompt is redrawn.  Do it
-#                                       some day if you can.
+#       ~/.clock_log/clin_notes     --> A log of timestamped, one-line notes
+#                                       describing actions, notes, ideas that you want to log while clocked in
+#                                       It is an error to try to modify this
+#                                       while not clocked in.
+#                                       This file only ever contains a log for
+#                                       the current session.  This is then
+#                                       written out to a .log file and deleted.
+#       ~/.clock_log/clout_notes    --> A log of timestamped, one-line notes
+#                                       describing actions, notes, ideas that occur when 
+#                                       you're not focusing on a particular project/outcome
+#                                       It is an error to try to modify this
+#                                       while clocked in (this is for focused or
+#                                       potentially billable time).
+#                                       This file only ever contains a log for
+#                                       the current session.  This is then
+#                                       written out to a .log file and deleted.
 
-###Algorithm outline
+
 
 #User has tried to clock out, so check state
 #   TODO: Add error checks 

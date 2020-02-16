@@ -12,6 +12,13 @@ A collection of `zsh` scripts that I use to log and monitor my time.  `clin` is
 mostly a personal project, but if you use them and have questions, let me know.
 They could be improved.
 
+**`theme_my_term.sh`**
+
+A script that does magic, giving your terminal a makeover that is both
+functional and aesthetically pleasing.  Seriously, check it out, read the
+comments (because the magic is actually done by
+github.com/Mayccoll/Gogh).
+
 **`ssh_proxy_jump.sh`**
 
 A manual, should-work-anywhere ssh tunnel including a proxy jump.  Do this more

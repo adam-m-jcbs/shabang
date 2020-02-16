@@ -26,6 +26,6 @@
 #       -s session-name
 #           : Name the session `session-name`.  This is important.  It is what we'll save state to.
 #   tmux shell:
-#       The last arg to `tmux new-session` is the interactive shell it will run.  Bash is usually best bet on shared resources.
+#       The last arg to `tmux new-session` is the interactive shell it will run.  Bash is usually best bet on shared resources. I prefer a login shell, thus -l
     
-tmux -2u -f ${HOME}/Codebase/dotfiles/tmux.conf new-session -AP -s icer_xrb_sens bash
+tmux -2u -f ${HOME}/Codebase/dotfiles/tmux.conf new-session -AP -s icer_xrb_sens bash -l

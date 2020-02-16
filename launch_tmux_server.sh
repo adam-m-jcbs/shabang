@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 #TODO: using `#!/bin/bash` is fine in most cases, but should consider more portable or userland versions, if needed
 
 # This script encodes my preferences and requirements for a tmux session server.

@@ -28,4 +28,4 @@
 #   tmux shell:
 #       The last arg to `tmux new-session` is the interactive shell it will run.  Bash is usually best bet on shared resources. I prefer a login shell, thus -l
     
-tmux -2u -f ${HOME}/Codebase/dotfiles/tmux.conf new-session -AP -s icer_xrb_sens bash -l
+tmux -2u -f ${HOME}/Codebase/dotfiles/tmux.conf new-session -AP -s icer_xrb_sens "bash -l"

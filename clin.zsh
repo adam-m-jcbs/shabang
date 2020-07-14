@@ -35,7 +35,7 @@
 #   TODO: make directories variables instead of hard-coded
 #
 #Use matching regex (date) sentinel to get state
-cur_state=`cat ~/.clock_log/clin_time        | awk '$1 ~ /[0-9]{4}-[0-9]{2}-[0-9]{2}/ {$1=$1;print}'` #awk magic ($1=$1 has side-effect of re-evaluating $0 and rebuilding with default separators) trims outer spaces and squeezes internal spaces to 1
+cur_state=`cat ~/.clock_log/clin_time        | awk '{$1=$1;print}'` #awk magic ($1=$1 has side-effect of re-evaluating $0 and rebuilding with default separators) trims outer spaces and squeezes internal spaces to 1
 if [[ $cur_state == 'OUT' ]]; then
     #We're here, so state was clocked out.
     #Good, that's what's expected for a clock in operation.

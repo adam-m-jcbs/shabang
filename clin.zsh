@@ -31,9 +31,11 @@
 #User has tried to clock in, so check state
 #   TODO: Add error checks 
 #       file should exist
-#       file should always have just one line with specifically formatted data
+#       file should always have specifically formatted data
 #   TODO: make directories variables instead of hard-coded
+#
 cur_state=`cat ~/.clock_log/clin_time | head -n1 | awk '{$1=$1;print}'` #awk magic trims outer spaces and squeezes internal spaces to 1
+cur_context=`cat ~/.clock_log/clin_time | head -n2 | tail -n1 |  awk '{$1=$1;print}'` #second line should be optional, has context
 if [[ $cur_state == 'OUT' ]]; then
     #We're here, so state was clocked out.
     #Good, that's what's expected for a clock in operation.

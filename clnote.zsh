@@ -35,7 +35,12 @@
 #       file should exist
 #       file should always have just one line with specifically formatted data
 #   TODO: make directories variables instead of hard-coded
+#Use matching regex (date) sentinel to get state
 cur_state=`cat ~/.clock_log/clin_time | head -n1 | awk '{$1=$1;print}'` #awk magic trims outer spaces and squeezes internal spaces to 1
+#Use matching regex (three capital letter code) sentinel to get context (optional! if blank, ignore)
+cur_context=`cat ~/.clock_log/clin_time      | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;print}'` 
+cur_context_code=`cat ~/.clock_log/clin_time | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;printf "%.3s", $1}'` 
+cur_context_desc=`cat ~/.clock_log/clin_time | awk '$1 ~ /[A-Z]{3}:/             {$1="";print $0}'` 
 if [[ $cur_state == 'OUT' ]]; then
     #We're here, so record note in clocked out log
     

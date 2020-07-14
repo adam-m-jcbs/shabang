@@ -34,7 +34,12 @@
 #       file should exist
 #       file should always have just one line with specifically formatted data
 #   TODO: make directories variables instead of hard-coded
-cur_state=`cat ~/.clock_log/clin_time | head -n1 | awk '{$1=$1;print}'` #awk magic trims outer spaces and squeezes internal spaces to 1
+#Use matching regex (date) sentinel to get state
+cur_state=`cat ~/.clock_log/clin_time        | awk '$1 ~ /[0-9]{4}-[0-9]{2}-[0-9]{2}/ {$1=$1;print}'` #awk magic ($1=$1 has side-effect of re-evaluating $0 and rebuilding with default separators) trims outer spaces and squeezes internal spaces to 1
+#Use matching regex (three capital letter code) sentinel to get context (optional! if blank, ignore)
+cur_context=`cat ~/.clock_log/clin_time      | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;print}'` 
+cur_context_code=`cat ~/.clock_log/clin_time | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;printf "%.3s", $1}'` 
+cur_context_desc=`cat ~/.clock_log/clin_time | awk '$1 ~ /[A-Z]{3}:/             {$1="";print $0}'` 
 if [[ cur_state == 'OUT' ]]; then
     #We're here, so state was clocked out.
     echo "You've already clocked out!"
@@ -53,13 +58,20 @@ else
         user_note=$1
     fi
 
+    #If the optional context is provided, prepare directories
+    with_slash=""
+    if [[ ! -d ~/.clock_log/$cur_context_code ]]; then
+        mkdir -p ~/.clock_log/$cur_context_code
+        with_slash=$cur_context_code/
+    fi
+ 
     #store record in ~/.clock_log/YYYY-MM-DD.log
     echo ${cl_start} -- ${cl_end} >>  ~/.clock_log/`date +"%F"`.log
     if [[ -f ~/.clock_log/clin_notes ]]; then
-        cat ~/.clock_log/clin_notes >>   ~/.clock_log/`date +"%F"`.log
+        cat ~/.clock_log/clin_notes >>   ~/.clock_log/${with_slash}`date +"%F"`.log
     fi
-    echo "    " $user_note >> ~/.clock_log/`date +"%F"`.log
-    echo "     Days H:M:S - " $time_elapsed_record >> ~/.clock_log/`date +"%F"`.log
+    echo "    " $user_note >> ~/.clock_log/${with_slash}`date +"%F"`.log
+    echo "     Days H:M:S - " $time_elapsed_record >> ~/.clock_log/${with_slash}`date +"%F"`.log
     
     #tell user gist of what happened
     echo "clocked out!"
@@ -78,6 +90,6 @@ else
     fi
 
     #The state's updated,
-    #my POWERLEVEL9K configuration has a custom segment that reads the state
+    #my zsh prompt configuration has a custom segment that reads the state
     #file, so this is all we need to do to update the prompt
 fi

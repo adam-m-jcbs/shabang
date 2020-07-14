@@ -34,27 +34,43 @@
 #       file should always have specifically formatted data
 #   TODO: make directories variables instead of hard-coded
 #
-cur_state=`cat ~/.clock_log/clin_time | head -n1 | awk '{$1=$1;print}'` #awk magic trims outer spaces and squeezes internal spaces to 1
-cur_context=`cat ~/.clock_log/clin_time | head -n2 | tail -n1 |  awk '{$1=$1;print}'` #second line should be optional, has context
+#Use matching regex (date) sentinel to get state
+cur_state=`cat ~/.clock_log/clin_time        | awk '$1 ~ /[0-9]{4}-[0-9]{2}-[0-9]{2}/ {$1=$1;print}'` #awk magic ($1=$1 has side-effect of re-evaluating $0 and rebuilding with default separators) trims outer spaces and squeezes internal spaces to 1
+#Use matching regex (three capital letter code) sentinel to get context (optional! if blank, ignore)
+cur_context=`cat ~/.clock_log/clin_time      | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;print}'` 
+cur_context_code=`cat ~/.clock_log/clin_time | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;printf "%.3s", $1}'` 
+cur_context_desc=`cat ~/.clock_log/clin_time | awk '$1 ~ /[A-Z]{3}:/             {$1="";print $0}'` 
 if [[ $cur_state == 'OUT' ]]; then
     #We're here, so state was clocked out.
     #Good, that's what's expected for a clock in operation.
+
+    #If the optional context is provided, prepare directories
+    with_slash=""
+    if [[ ! -d ~/.clock_log/$cur_context_code ]]; then
+        mkdir -p ~/.clock_log/$cur_context_code
+        with_slash=$cur_context_code/
+    fi
     
     #Store any clocked out log in ~/.clock_log/YYYY-MM-DD.log
     if [[ -f ~/.clock_log/clout_notes ]]; then
-        cat ~/.clock_log/clout_notes >>  ~/.clock_log/`date +"%F"`.log
+        cat ~/.clock_log/clout_notes >>  ~/.clock_log/${with_slash}`date +"%F"`.log
         rm ~/.clock_log/clout_notes
     fi
 
     date +"%F %H:%M:%S" > ~/.clock_log/clin_time
-    date +"IN %H:%M" > ~/.clock_log/state
+    echo $cur_context >> ~/.clock_log/clin_time
+    with_parens=\(${cur_context_code}\)
+    date +"IN${with_parens} %H:%M" > ~/.clock_log/state
 
     #The state's updated,
     #my POWERLEVEL9K configuration has a custom segment that reads the state
     #file, so this is all we need to do to update the prompt
 else
     echo "You've already clocked in!"
-    echo "    IN@ " $cur_state
+    echo "    IN@  " $cur_state
+    if [[ -n $cur_context ]]; then
+        echo "    ctx: " $cur_context
+    fi
 fi
 
 #       TODO implement clest? I'm kinda OK with just clnote... we'll see

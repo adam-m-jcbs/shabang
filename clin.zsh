@@ -36,15 +36,24 @@
 #
 #Use matching regex (date) sentinel to get state
 cur_state=`cat ~/.clock_log/clin_time        | awk '$1 ~ /[0-9]{4}-[0-9]{2}-[0-9]{2}/ {$1=$1;print}'` #awk magic ($1=$1 has side-effect of re-evaluating $0 and rebuilding with default separators) trims outer spaces and squeezes internal spaces to 1
-#Use matching regex (three capital letter code) sentinel to get context (optional! if blank, ignore)
-cur_context=`cat ~/.clock_log/clin_time      | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;print}'` 
-cur_context_code=`cat ~/.clock_log/clin_time | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;printf "%.3s", $1}'` 
-cur_context_desc=`cat ~/.clock_log/clin_time | awk '$1 ~ /[A-Z]{3}:/             {$1="";print $0}'` 
 if [[ $cur_state == 'OUT' ]]; then
     #We're here, so state was clocked out.
     #Good, that's what's expected for a clock in operation.
 
     #If the optional context is provided, prepare directories
+    cur_context='NULL'
+    if [[ $# -gt 0 ]]; then
+        #TODO: Assuming proper form for now, need to error-check
+        #Take all arguments except the first/0th (name of script)
+        cur_context=${@:1:${#@[@]}} #We assume form "XXX: human-readable desc of XXX"
+    fi
+
+    echo $cur_context
+    exit
+    
+    #Use matching regex (three capital letter code) sentinel to get context details
+    cur_context_code=`echo $cur_context  | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;printf "%.3s", $1}'` 
+    cur_context_desc=`echo $cur_context  | awk '$1 ~ /[A-Z]{3}:/             {$1="";print $0}'` 
     with_slash=""
     if [[ ! -d ~/.clock_log/$cur_context_code ]]; then
         mkdir -p ~/.clock_log/$cur_context_code

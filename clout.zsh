@@ -58,21 +58,33 @@ else
         user_note=$1
     fi
 
-    #If the optional context is provided, prepare directories
+    #If the optional context is provided, prepare vars
     with_slash=""
-    if [[ ! -d ~/.clock_log/$cur_context_code ]]; then
-        mkdir -p ~/.clock_log/$cur_context_code
+    if [[ -d ~/.clock_log/$cur_context_code ]]; then
         with_slash=$cur_context_code/
     fi
- 
+
     #store record in ~/.clock_log/YYYY-MM-DD.log
     echo ${cl_start} -- ${cl_end} >>  ~/.clock_log/`date +"%F"`.log
-    if [[ -f ~/.clock_log/clin_notes ]]; then
-        cat ~/.clock_log/clin_notes >>   ~/.clock_log/${with_slash}`date +"%F"`.log
+    if [[ -n ${with_slash} ]]; then
+        echo "Context code: $cur_context_code" >>  ~/.clock_log/`date +"%F"`.log
     fi
-    echo "    " $user_note >> ~/.clock_log/${with_slash}`date +"%F"`.log
-    echo "     Days H:M:S - " $time_elapsed_record >> ~/.clock_log/${with_slash}`date +"%F"`.log
-    
+    if [[ -f ~/.clock_log/clin_notes ]]; then
+        cat ~/.clock_log/clin_notes >>   ~/.clock_log/`date +"%F"`.log
+    fi
+    echo "    " $user_note >> ~/.clock_log/`date +"%F"`.log
+    echo "     Days H:M:S - " $time_elapsed_record >> ~/.clock_log/`date +"%F"`.log
+
+    #also store a context log if there's a context
+    if [[ -n ${with_slash} ]]; then
+        echo ${cl_start} -- ${cl_end} >>  ~/.clock_log/${with_slash}`date +"%F"`.log
+        if [[ -f ~/.clock_log/clin_notes ]]; then
+            cat ~/.clock_log/clin_notes >>   ~/.clock_log/${with_slash}`date +"%F"`.log
+        fi
+        echo "    " $user_note >> ~/.clock_log/${with_slash}`date +"%F"`.log
+        echo "     Days H:M:S - " $time_elapsed_record >> ~/.clock_log/${with_slash}`date +"%F"`.log
+    fi
+
     #tell user gist of what happened
     echo "clocked out!"
     if [[ -f ~/.clock_log/clin_notes ]]; then

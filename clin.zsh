@@ -51,9 +51,6 @@ if [[ $cur_state == 'OUT' ]]; then
         cur_context=${@:1:${#@[@]}} #We assume form "XXX: human-readable desc of XXX"
     fi
 
-    echo $cur_context
-    exit
-    
     #Use matching regex (three capital letter code) sentinel to get context details
     cur_context_code=`echo $cur_context  | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;printf "%.3s", $1}'` 
     cur_context_desc=`echo $cur_context  | awk '$1 ~ /[A-Z]{3}:/             {$1="";print $0}'` 

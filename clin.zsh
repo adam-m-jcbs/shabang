@@ -40,20 +40,37 @@ cur_state=`cat ~/.clock_log/clin_time        | awk '{$1=$1;print}'` #awk magic (
 cur_context=`cat ~/.clock_log/clin_time      | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;print}'` 
 cur_context_code=`cat ~/.clock_log/clin_time | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;printf "%.3s", $1}'` 
 cur_context_desc=`cat ~/.clock_log/clin_time | awk '$1 ~ /[A-Z]{3}:/             {$1="";print $0}'` 
+
 if [[ $cur_state == 'OUT' ]]; then
     #We're here, so state was clocked out.
     #Good, that's what's expected for a clock in operation.
 
+    cur_context_code=""
+    cur_context_desc=""
     #If the optional context is provided, prepare directories
     if [[ $# -gt 0 ]]; then
+        #See if this is a new ('XXX: desc of XXX') or an existing context ('XXX')
+        
         #TODO: Assuming proper form for now, need to error-check
         #Take all arguments except the first/0th (name of script)
-        cur_context=${@:1:${#@[@]}} #We assume form "XXX: human-readable desc of XXX"
+        cur_context=${@:1:${#@[@]}} 
+        #Use matching regex (three capital letter code) sentinel to get context details
+        #We assume form "XXX: human-readable desc of XXX" for new contexts
+        #               "XXX" for existing contexts
+        cur_context_code=`echo ${cur_context} | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;printf "%.3s", $1}'` 
+        cur_context_desc=`echo ${cur_context} | awk '$1 ~ /[A-Z]{3}:/             {$1="";print $0}'` 
+        
+        if [[ -z $cur_context_code ]]; then
+            #We didn't get the form for a new context, so this context must
+            #exist ($cur_context="XXX").  Extract it.
+            cur_context_code=`cat ~/.clock_log/${cur_context}/context_description | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;printf "%.3s", $1}'` 
+            cur_context_desc=`cat ~/.clock_log/${cur_context}/context_description | awk '$1 ~ /[A-Z]{3}:/             {$1="";print $0}'` 
+        else
+            #The user has defined a new context, store the info
+            echo "${cur_context_code}: ${cur_context_desc}" > ~/.clock_log/${cur_context_code}/context_description
+        fi
     fi
 
-    #Use matching regex (three capital letter code) sentinel to get context details
-    cur_context_code=`echo $cur_context  | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;printf "%.3s", $1}'` 
-    cur_context_desc=`echo $cur_context  | awk '$1 ~ /[A-Z]{3}:/             {$1="";print $0}'` 
     with_slash=""
     if [[ ! -d ~/.clock_log/$cur_context_code ]]; then
         mkdir -p ~/.clock_log/$cur_context_code

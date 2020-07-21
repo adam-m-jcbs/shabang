@@ -34,7 +34,7 @@
 #       file should always have specifically formatted data
 #   TODO: make directories variables instead of hard-coded
 #
-#Use matching regex (date) sentinel to get state
+#At first, just get the raw state (should be OUT or a clock in time)
 cur_state=`cat ~/.clock_log/clin_time        | awk '{$1=$1;print}'` #awk magic ($1=$1 has side-effect of re-evaluating $0 and rebuilding with default separators) trims outer spaces and squeezes internal spaces to 1
 #Use matching regex (three capital letter code) sentinel to get context (optional! if blank, ignore)
 cur_context=`cat ~/.clock_log/clin_time      | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;print}'` 
@@ -45,6 +45,7 @@ if [[ $cur_state == 'OUT' ]]; then
     #We're here, so state was clocked out.
     #Good, that's what's expected for a clock in operation.
 
+    cur_context=""
     cur_context_code=""
     cur_context_desc=""
     #If the optional context is provided, prepare directories
@@ -60,20 +61,26 @@ if [[ $cur_state == 'OUT' ]]; then
         cur_context_code=`echo ${cur_context} | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;printf "%.3s", $1}'` 
         cur_context_desc=`echo ${cur_context} | awk '$1 ~ /[A-Z]{3}:/             {$1="";print $0}'` 
         
-        if [[ -z $cur_context_code ]]; then
+        if [[ -z "$cur_context_code" ]]; then
             #We didn't get the form for a new context, so this context must
             #exist ($cur_context="XXX").  Extract it.
             cur_context_code=`cat ~/.clock_log/${cur_context}/context_description | awk '$1 ~ /[A-Z]{3}:/             {$1=$1;printf "%.3s", $1}'` 
             cur_context_desc=`cat ~/.clock_log/${cur_context}/context_description | awk '$1 ~ /[A-Z]{3}:/             {$1="";print $0}'` 
+            cur_context="${cur_context_code}: ${cur_context_desc}"
+            echo "reading in existing context: ${cur_context}"
         else
             #The user has defined a new context, store the info
+            cur_context="${cur_context_code}: ${cur_context_desc}"
+            echo "creating context ${cur_context}"
+            mkdir -p ~/.clock_log/$cur_context_code
             echo "${cur_context_code}: ${cur_context_desc}" > ~/.clock_log/${cur_context_code}/context_description
         fi
     fi
 
+    #`with_slash` is a hacky string that acts as a boolean.  empty means no
+    #context.
     with_slash=""
-    if [[ ! -d ~/.clock_log/$cur_context_code ]]; then
-        mkdir -p ~/.clock_log/$cur_context_code
+    if [[ -d ~/.clock_log/$cur_context_code ]]; then
         with_slash=$cur_context_code/
     fi
     
